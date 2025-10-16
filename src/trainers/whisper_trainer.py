@@ -1,12 +1,10 @@
 from transformers import Seq2SeqTrainer, TrainingArguments, TrainerCallback, TrainerState, TrainerControl
-import evaluate
 import os 
 from transformers.trainer_utils import PREFIX_CHECKPOINT_DIR
 import re
 from typing import List
 from src.trainers.progress_callback import TqdmProgressCallback
-
-wer_metric = evaluate.load("wer")
+from jiwer import wer
 
 # class WhisperTrainer(Seq2SeqTrainer):
 #     def compute_loss(self, model, inputs, return_outputs=False):
@@ -99,9 +97,8 @@ def get_trainer(model, args, processor_args, train_dataset, eval_dataset, data_c
         pred_str = remove_punctuation(pred_str)
         label_str = remove_punctuation(label_str)
         # we do not want to group tokens when computing the metrics
-        wer = 100 * wer_metric.compute(predictions=pred_str, references=label_str)
-        # loss = pred.loss.mean().item() if pred.loss is not None else None
-        return {"wer": wer}
+        wer_score = 100 * wer(label_str, pred_str)
+        return {"wer": wer_score}
 
     return Seq2SeqTrainer(
         model=model,

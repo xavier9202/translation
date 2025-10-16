@@ -3,7 +3,6 @@ import time
 from time import strftime, localtime
 import os
 
-import evaluate
 from tqdm import tqdm
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
@@ -12,6 +11,7 @@ import librosa
 import numpy as np
 from src.utils.logging import logger
 import math
+from jiwer import wer
 
 # Follow open_asr_leaderboard
 # https://github.com/huggingface/open_asr_leaderboard/blob/main/speechbrain/run_eval.py
@@ -147,18 +147,14 @@ def main(args):
         all_results["audio_length_s"].extend(batch["audio_length_s"])
 
     # Calculate WER
-    wer_metric = evaluate.load("wer")
-    wer = wer_metric.compute(
-        references=all_results["references"], predictions=all_results["predictions"]
-    )
-    wer = round(100 * wer, 2)
+    wer_score = round(100 * wer(all_results["references"], all_results["predictions"]), 2)
 
     # Calculate RTFx
     rtfx = round(
         sum(all_results["audio_length_s"]) / sum(all_results["transcription_time_s"]), 2
     )
 
-    print(f"WER: {wer}%, RTFx: {rtfx}")
+    print(f"WER: {wer_score}%, RTFx: {rtfx}")
 
     # Save results
     output_dir = "evaluation_results"
@@ -169,7 +165,7 @@ def main(args):
     with open(output_file, "w") as f:
         f.write(f"Model: {args.model_name_or_path}\n")
         f.write(f"Split: {args.split}\n")
-        f.write(f"WER: {wer}%\n")
+        f.write(f"WER: {wer_score}%\n")
         f.write(f"RTFx: {rtfx}\n")
     print(f"Results saved to {output_file}")
 

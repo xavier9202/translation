@@ -18,7 +18,6 @@ REQUIRED_MODULES = {
     "numpy": "pip install numpy",
     "tqdm": "pip install tqdm",
     "peft": "pip install peft",
-    "evaluate": "pip install evaluate",
     "accelerate": "pip install accelerate",
     "soundfile": "pip install soundfile",
     "sentencepiece": "pip install sentencepiece",
