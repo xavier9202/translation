@@ -49,6 +49,7 @@ class HFHubDatasetStrategy(DatasetStrategy):
             self.dataset_attr.dataset_name,
             *self.dataset_attr.dataset_args,
             **self.dataset_attr.dataset_kwargs,
+            trust_remote_code=True,
         )
         if self.dataset_attr.kwargs:
             dataset = dataset.filter(lambda example: example["language"] == self.dataset_attr.kwargs.get('language'))
