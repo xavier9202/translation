@@ -99,12 +99,18 @@ def main():
         training_args.fp16 = False
         os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
 
-    if training_args.gradient_checkpointing and device_type != "cuda":
-        logger.warning(
-            "Disabling gradient checkpointing on device '%s' (only worthwhile on CUDA).",
-            device_type,
-        )
-        training_args.gradient_checkpointing = False
+    if training_args.gradient_checkpointing:
+        if device_type != "cuda":
+            logger.warning(
+                "Disabling gradient checkpointing on device '%s' (only worthwhile on CUDA).",
+                device_type,
+            )
+            training_args.gradient_checkpointing = False
+        else:
+            logger.warning(
+                "Disabling gradient checkpointing to avoid backward graph reuse issues during LoRA training."
+            )
+            training_args.gradient_checkpointing = False
     # Configure LoRA if specified
     peft_config = None
     if model_args.use_peft:
